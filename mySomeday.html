@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<link href='https://fonts.googleapis.com/css?family=PT+Sans'
+	rel='stylesheet' type='text/css'>
+<meta charset="ISO-8859-1">
+<title>mySomeday</title>
+<script src='Chart.min.js'></script>
+<style>
+* {
+	font-family: 'PT Sans', sans-serif;
+}
+
+#header {
+	background-color: rgba(0, 55, 164, 1);
+	color: white;
+	text-align: left;
+	padding: 5px;
+	width: 100%;
+	height: 60px;
+	vertical-align: center;
+	font-size: 22px;
+	font-weight: bold;
+	top: 0px;
+	position: fixed;
+	left: 0px;
+	letter-spacing: 2px;
+}
+
+#logo {
+	top: 10px;
+	left: 15px;
+	height: 40px;
+	width: 55px;
+	position: relative;
+	margin-right: 20px;
+}
+
+#nav {
+	line-height: 30px;
+	background-color: #eeeeee;
+	height: 300px;
+	width: 250px;
+	position: fixed;
+	left: 0px;
+	padding: 5px;
+	top: 70px;
+	height: 100%;
+	border-right: 3px solid #dddddd;
+}
+
+#graph {
+	background-color: "green";
+	text-align: center;
+	width: 350px;
+	float: left;
+}
+
+#stuff {
+	background-color: #ffffff;
+	border-radius: 6px;
+	margin: 8px;
+	padding: 8px;
+	border: thin solid #cdcdcd;
+	color: #333333;
+	font-size: 14px;
+	line-height:26px;
+}
+
+select {
+	background-color: #f7f8ff;
+	height: 30px;
+	border-radius: 3px;
+	width: 100%;
+	font-weight: 700;
+	padding-left: 5px;
+	color: rgba(0, 55, 164, 1);
+	margin-bottom: 5px;
+	box-shadow: inset 0px 0px 0px 3px rgba(0, 0, 0, 0.03);
+}
+
+option {
+	font-weight: 700;
+}
+
+#budget-input {
+	width: 40px;
+	margin-left: 43px;
+	text-align: right;
+	padding: 2px;
+	border-radius: 3px;
+	border: thin solid gray;
+	background-color: #f7f8ff;
+	color: #9B301B;
+}
+
+table {
+	text-align: left;
+	line-height: 10px;
+}
+
+.budget1 {
+	text-align: left;
+}
+
+.budget2 {
+	color: #666666;
+	text-indent: 14px;
+	text-align: left;
+}
+
+.budget3 {
+	color: #9B301B;
+	margin-left: 40px;
+	text-align: right;
+	padding: 5px;
+	line-height: 15px;
+}
+
+form {
+	line-height: 22px;
+}
+
+label {
+	display: block;
+	padding-left: 1em;
+	text-indent: -1.4em;
+}
+#title {
+	text-align: left;
+	font-weight: bold;
+	font-size: 25px;
+}
+.aside {
+	text-align: right;
+}
+
+#mytext {
+	border: none;
+	color:  #9B301B;
+	font-weight: 700;
+	width: 45px;
+	text-indent: 3px;
+}
+
+</style>
+</head>
+
+<body>
+
+	<header id="header">
+		<img src="images/rbc_logo.png" id="logo" /> mySomeday
+	</header>
+
+	<div id="nav">
+
+		<div id="stuff">
+			<tr>
+				<td>mySomeday is in...</td>
+				<br>
+				<td><select>
+						<option>1 year</option>
+						<option>3 years</option>
+						<option>5 years</option>
+						<option>10 years</option>
+						<option>15 years</option>
+						<option>20 years</option>
+						<option>25 years</option>
+						<option>30 years</option>
+				</select></td>
+			</tr>
+		</div>
+
+		<div id="stuff">
+			Use my activity from the...
+			<td><select>
+					<option>Past month</option>
+					<option>Past 3 months</option>
+					<option>Past 6 months</option>
+					<option>Past year</option>
+					<option>Past 3 years</option>
+					<option>Past 5 years</option>
+			</select>
+				<table class="budget">
+					<tr>
+						<th class="budget1">Monthly income</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="income" value="3000"
+							style="color: #6B702B; font-weight: 700; width: 45px;"
+							onchange="changeIncome(value);"></th>
+					</tr>
+					<tr>
+						<th class="budget1">Monthly expenses</th>
+						<th class="budget1"><div class="budget3"><input type="text" id="mytext"></div></th>
+					</tr>
+					<tr>
+						<th class="budget2">Housing</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="housing" value="900"
+							onchange="changeExpenses(value, name);"></th>
+					</tr>
+					<tr>
+						<th class="budget2">Groceries</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="groceries" value="200"
+							onchange="changeExpenses(value, name);"></th>
+					</tr>
+					<tr>
+						<th class="budget2">Restaurants</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="restaurant" value="150"
+							onchange="changeExpenses(value, name);"></th>
+					</tr>
+					<tr>
+						<th class="budget2">Transportation</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="transportation" value="190"
+							onchange="changeExpenses(value, name);"></th>
+					</tr>
+					<tr>
+						<th class="budget2">Entertainment</th>
+						<th class="budget1"><input id="budget-input" type="number"
+							name="entertainment" value="60"
+							onchange="changeExpenses(value, name);"></th>
+					</tr>
+				</table></td>
+		</div>
+
+		<div id="stuff">
+			<form action="">
+				<label><input type="checkbox" name="invest"
+					checked="checked">Show how my money could grow with RBC
+					investment options</label>
+			</form>
+		</div>
+		<div id="stuff">
+			<a href="" style="line-height: 15px; color: blue;">Please click this link to contact your advisor.</a>
+		</div>
+	
+
+	<div style="position: absolute; left: 270px; top: 20px;"> <!-- top: 80px -->
+		<!-- <p><span id="title">My Balance</span><span style="text-align:right;">legend</span></p> -->
+		<table border="0" width="100%">
+			<tr>
+				<td id="title">My Balance</td>
+				<td style="text-align:right; padding-bottom: 30px;"><font color="blue"><b>With new budget</b></font> | <font color="gray"><b>With investment in RBC Product</b></font></td>
+			</tr>
+		</table>
+		
+		
+		
+		<canvas id="balance" width="1000" height="600"></canvas>
+		<script>
+			var chart1;
+			var income = 3000;
+			var housing = 900;
+			var groceries = 200;
+			var restaurant = 150;
+			var transportation = 190;
+			var entertainment = 60;
+			var expenses = housing + entertainment + transportation + groceries
+					+ restaurant;
+
+			var data1 = [ 1247.80, 1556.80, 1621.80, 1963.80];
+			var data2 = [ 1547.80, 1656.80, 1821.80, 2163.80];
+			var rate = 0.05;
+			
+			//Draw initial graph
+			var increment = income - expenses;
+			var investTotal = data2[3]*Math.pow((1+rate), (32.0/12)) + 12*increment*((Math.pow((1+rate),(32.0/12))-1)/rate);
+			var investInc = investTotal/32.0;
+			
+			var start = 4;
+			for (var i = 0; i < 32; i++) {
+				data1[start + i] = data1[start - 1] + increment * (i + 1);
+				data2[start + i] = data2[start - 1] + investInc * (i + 1);
+			}
+			var balanceData = {
+					labels : [ "Jan 16", "Feb 16", "Mar 16", "Apr 16",
+							"May 16", "Jun 16", "Jul 16", "Aug 16", "Sep 16",
+							"Oct 16", "Nov 16", "Dec 16", "Jan 17", "Feb 17",
+							"Mar 17", "Apr 17", "May 17", "Jun 17", "Jul 17",
+							"Aug 17", "Sep 17", "Oct 17", "Nov 17", "Dec 17",
+							"Jan 18", "Feb 18", "Mar 18", "Apr 18", "May 18",
+							"Jun 18", "Jul 18", "Aug 18", "Sep 18", "Oct 18",
+							"Nov 18", "Dec 18" ],
+					datasets : [ {
+						fillColor : "rgba(0,40,136,0)",
+						strokeColor : "#002888",
+						pointColor : "#fff",
+						pointStrokeColor : "#9DB86D",
+						data : data1
+					}, {
+						fillColor : "rgba(0,40,136,0)",
+						strokeColor : "#D3D3D3",
+						pointColor : "#fff",
+						pointStrokeColor : "#9DB86D",
+						data : data2
+					} ]
+				}
+				var balance = document.getElementById('balance').getContext(
+						'2d');
+			chart1 = new Chart(balance).Line(balanceData);
+			
+			document.getElementById("mytext").value = expenses;
+			
+			function changeExpenses(data, name) {
+				// manipulate value of event attr
+				// update data on graph
+
+				console.log(data + " " + name);
+
+				if (name == "housing")
+					housing = parseInt(data);
+				else if (name == "transportation")
+					transportation = parseInt(data);
+				else if (name == "restaurant")
+					restaurant = parseInt(data);
+				else if (name == "groceries")
+					groceries = parseInt(data);
+				else
+					entertainment = parseInt(data);
+
+				expenses = housing + entertainment + transportation + groceries
+						+ restaurant;
+				console.log(income + " " + expenses);
+				var increment = income - expenses;
+				var investTotal = data2[3]*Math.pow((1+rate), (32.0/12)) + 12*increment*((Math.pow((1+rate),(32.0/12))-1)/rate);
+				var investInc = investTotal/32.0;
+				
+				var start = 4;
+				for (var i = 0; i < 32; i++) {
+					chart1.datasets[0].points[start + i].value = chart1.datasets[0].points[start - 1].value + increment * (i + 1);
+					chart1.datasets[1].points[start + i].value = chart1.datasets[1].points[start - 1].value + investInc * (i + 1);
+				}
+				chart1.update();
+				document.getElementById("mytext").value = expenses;
+			};
+			
+			function getExpenses(){
+				return expenses;
+			}
+
+			function changeIncome(data) {
+				// manipulate value of event attr
+				// update data on graph
+
+				console.log(data);
+
+				income = parseInt(data);
+				var increment = income - expenses;
+				var investTotal = data2[3]*Math.pow((1+rate), (32.0/12)) + 12*increment*((Math.pow((1+rate),(32.0/12))-1)/rate);
+				var investInc = investTotal/32.0;
+				
+				var start = 4;
+				for (var i = 0; i < 32; i++) {
+					chart1.datasets[0].points[start + i].value = chart1.datasets[0].points[start - 1].value + increment * (i + 1);
+					chart1.datasets[1].points[start + i].value = chart1.datasets[1].points[start - 1].value + investInc * (i + 1);
+				}
+				chart1.update();
+				document.getElementById("mytext").value = expenses;
+			};
+
+		</script>
+	</div>
+	
+</body>
+</html>
