@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Projects - Jeffrey Wang</title>
+
+    <link rel="icon" href="img/j.png">
+
+    <!-- Bootstrap Core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="css/business-casual.css" rel="stylesheet">
+
+    <!-- Fonts -->
+    <link href="http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Josefin+Slab:100,300,400,600,700,100italic,300italic,400italic,600italic,700italic" rel="stylesheet" type="text/css">
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,600,500' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div class="brand">Jeffrey Wang</div>
+    <div class="address-bar">j699wang@uwaterloo.ca | <a href="http://github.com/jeffwang13" target="_blank" class = "class1">Github</a> | <a href="http://linkedin.com/in/jeffreywang13" target="_blank" class = "class1">LinkedIn</a> | (647) 929-2870</div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <!-- navbar-brand is hidden on larger screens, but visible when the menu is collapsed -->
+                <a class="navbar-brand" href="index.html">Jeffrey Wang</a>
+            </div>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li>
+                        <a href="index.html">Home</a>
+                    </li>
+                    <li>
+                        <a href="projects.html">Projects</a>
+                    </li>
+                    <li>
+                        <a href="resume.html">Resume</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="box">
+                <div class="col-lg-12">
+                    <hr>
+                    <h2 class="intro-text text-center">
+                        <strong>Neon Hex</strong> - Java Game
+                    </h2>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <img class="img-responsive img-border-left" src="img/skinnyHex.png" alt="">
+                </div>
+                <div class="col-md-6">
+                    <p>We created a game of Hex with an AI for our grade 12 summative project. The objective of the game is to colour in spaces of your own colour and connect pieces from one side to the other on the board, while simultaneously trying to block your opponent.</p>
+                    <p>The Minimax algorithm was used to determine the best move for the computer and then make that move. We looked two moves ahead and scored the board at each state to determine the best move for the player and then the computer. I am currently working on improving the scoring of the board and consequently the strength of the AI.
+                    </p>
+                    <p>Source code for Neon Hex is available on my <a href="https://github.com/jeffwang13/JavaGames/tree/master/Neon%20Hex" target="_blank">Github</a>.
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="box">
+                <div class="col-lg-12">
+                    <hr>
+                    <h2 class="intro-text text-center">
+                        <strong>mySomeday</strong> - Web Application
+                    </h2>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <img class="img-responsive img-border-left" src="img/mySomeday.png" alt="">
+                </div>
+                <div class="col-md-6">
+                     <p>
+                     <a href="mySomeday.html" target="_blank">mySomeday</a> is a basic web application prototype I created at a hackathon while working for RBC. The point was to create an application using IBM Bluemix cloud technology that would benefit RBC as well as improve our customers' experience. </p>
+                     <p>To accomplish this I made a budgeting tool that visualizes customer's account balances, allowing them to adjust their spending and cut down to meet their savings goals in the future. 
+                     </p>
+                     <p>The idea was well recieved by judges in the RBC Cloud Computing Challenge as well as a Director within RBC.
+                     </p>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="box">
+                <div class="col-lg-12">
+                    <hr>
+                    <h2 class="intro-text text-center">
+                        <strong>Goldman Hacks</strong> - Java Trading Bot
+                    </h2>
+                    <hr>
+                 </div>
+                <div class="col-md-6">
+                    <img class="img-responsive img-border-left" src="img/stock.jpg" alt="">
+                </div>
+                <div class="col-md-6">
+                    <p>On January 23, 2016, I participated in Jane Street's electronic trading hackathon with my team Goldman Hacks. We created a trading bot in Java to trade against other bots in a simulated market on Amazon Web Services.</p>
+                    <p>Our bot performed well with many strategies such as the calculation of a moving average to estimate the fair price of equities. Source code available upon request to maintain competition integrity.
+                    </p>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="row">
+        <div class="box">
+                <div class="col-lg-12">
+                    <hr>
+                    <h2 class="intro-text text-center">
+                        <strong>Sushi Shop Tycoon</strong> - Java Game
+                    </h2>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <img class="img-responsive img-border-left" src="img/SushiMenu.png" alt="">
+                </div>
+                <div class="col-md-6">
+                    <p>Sushi Shop Tycoon is a Java restaurant simulation game created in June 2014. The goal of the game is to make as much money as you can within one year of fun resturant simulation!</p>
+                    <p>Players can choose to alter Pricing, Advertisment, Staffing and Purchasing factors, all while keeping track of recent news and stats. All of this factors into a calculation that determines customer behaviour and ultimately the amount of sushi you sell.</p>
+                   <p>Source code for Sushi Shop Tycoon is available on my <a href="https://github.com/jeffwang13/JavaGames/tree/master/Sushi%20Shop%20Tycoon" target="_blank">Github</a>.
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+        <div class="row">
+        <div class="box">
+                <div class="col-lg-12">
+                    <hr>
+                    <h2 class="intro-text text-center">
+                        <strong>TrakRecord</strong> - Android App
+                    </h2>
+                    <hr>
+                </div>
+                <div class="col-md-3">
+                    <img class="img-responsive img-border-left" src="img/trakrecord.png" alt="">
+                </div>
+                <div class="col-md-3">
+                    <img class="img-responsive img-border-left" src="img/trakrecord1.png" alt="">
+                </div>
+                <div class="col-md-6">
+                    <p>TrakRecord is a marathon tracking app created in March 2016 at Wearhacks Toronto that is still in development. It is used to track user progress and statistics in walkathons and marathons.</p>
+                    <p>After winning $20K in support from Cossette Labs to continue development, our team is currently working with Cossette to make this a full-fledged race companion app, with features being added to notify users of nearby events (in walkathons) and to map out the race route.</p>
+                    <p>Source code for our initial prototype of TrakRecord is available on <a href="http://github.com/syuyitung/MarathonTracker" target="_blank">Github.</p>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+        </div>
+    </div>
+    <!-- /.container -->
+
+    <footer>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <p>Copyright &copy; Jeffrey Wang 2016</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- jQuery -->
+    <script src="js/jquery.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+</body>
+
+</html>
