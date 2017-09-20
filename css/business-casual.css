@@ -6,7 +6,7 @@
 
 body {
     font-family: "Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
-    background: url('../img/bg.jpg') no-repeat center center fixed;
+    background: url('../img/bg.png') no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -14,7 +14,7 @@ body {
 }
 
 a.class1 {
-    color: lightblue;
+    color: midnightblue;
 }
 
 a{
@@ -108,6 +108,10 @@ hr {
 .img-left {
     float: none;
     margin: 0 auto 0;
+}
+
+.img-circle {
+    border-radius: 50%;
 }
 
 footer {
