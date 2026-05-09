@@ -7,7 +7,12 @@ interface Props {
 }
 
 const { project } = Astro.props;
-const { title, summary, cover, tags } = project.data;
+const { title, summary, cover, tags, date } = project.data;
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+});
 ---
 <a
   href={`/projects/${project.id}/`}
@@ -25,9 +30,17 @@ const { title, summary, cover, tags } = project.data;
     </div>
   )}
   <div class="p-5">
-    <h3 class="font-serif text-xl group-hover:text-[var(--color-accent-600)] transition-colors">
-      {title}
-    </h3>
+    <div class="flex items-baseline justify-between gap-3">
+      <h3 class="font-serif text-xl group-hover:text-[var(--color-accent-600)] transition-colors">
+        {title}
+      </h3>
+      <time
+        datetime={date.toISOString()}
+        class="shrink-0 rounded-full border border-[var(--color-accent-200)] bg-[var(--color-accent-50)] px-2 py-0.5 text-xs text-[var(--color-accent-700)] dark:border-[var(--color-accent-800)] dark:bg-transparent dark:text-[var(--color-accent-300)]"
+      >
+        {formattedDate}
+      </time>
+    </div>
     <p class="mt-2 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)] line-clamp-2">
       {summary}
     </p>
