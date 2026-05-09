@@ -1,5 +1,10 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+
+const featured = (await getCollection('projects', ({ data }) => data.featured && !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 <BaseLayout title="Jeffrey Wang">
   <section class="mx-auto max-w-3xl px-6 pt-20 pb-16">
@@ -11,17 +16,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </p>
   </section>
 
-  <section class="mx-auto max-w-3xl px-6 pb-20">
-    <div class="flex items-baseline justify-between border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] pb-3">
-      <h2 class="font-serif text-2xl">Projects</h2>
-      <a href="/projects/" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent-500)] dark:text-[var(--color-muted-dark)] transition-colors">
-        all projects &rarr;
-      </a>
-    </div>
-    <p class="mt-6 text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-      Featured projects coming soon. Until then, the
-      <a class="text-[var(--color-accent-600)] underline underline-offset-4 hover:text-[var(--color-accent-700)]" href="/legacy/projects.html">2019 projects page</a>
-      has the full list.
-    </p>
-  </section>
+  {featured.length > 0 && (
+    <section class="mx-auto max-w-3xl px-6 pb-20">
+      <div class="flex items-baseline justify-between border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] pb-3">
+        <h2 class="font-serif text-2xl">Featured projects</h2>
+        <a href="/projects/" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent-500)] dark:text-[var(--color-muted-dark)] transition-colors">
+          all projects &rarr;
+        </a>
+      </div>
+      <div class="mt-6 grid gap-6 sm:grid-cols-2">
+        {featured.map((project) => (
+          <ProjectCard project={project} />
+        ))}
+      </div>
+    </section>
+  )}
 </BaseLayout>

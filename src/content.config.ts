@@ -14,7 +14,7 @@ const projects = defineCollection({
       links: z
         .object({
           github: z.string().url().optional(),
-          demo: z.string().url().optional(),
+          demo: z.string().optional(),
         })
         .optional(),
       draft: z.boolean().default(false),
