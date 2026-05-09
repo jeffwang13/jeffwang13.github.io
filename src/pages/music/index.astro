@@ -5,100 +5,136 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 const performances = (await getCollection('music', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-// Group by year for the timeline
-const byYear = new Map<number, typeof performances>();
-for (const p of performances) {
-  const y = p.data.date.getUTCFullYear();
-  if (!byYear.has(y)) byYear.set(y, []);
-  byYear.get(y)!.push(p);
-}
-const years = [...byYear.keys()].sort((a, b) => b - a);
-
 const fmtDate = (d: Date) =>
-  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+  d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+
+// Deterministic per-entry pseudo-random feel: tiny rotations + tape colors + arrow seeds
+const rot = (i: number) => ((i * 7919) % 7) - 3;          // -3..+3 deg
+const tapeRot = (i: number) => ((i * 6577) % 21) - 10;    // -10..+10 deg
+const tapeShift = (i: number) => ((i * 4621) % 60) - 30;  // -30..+30 px
+const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi colors
 ---
 <BaseLayout title="Music — Jeffrey Wang" description="A timeline of music performances I've given.">
-  <section class="mx-auto max-w-3xl px-6 pt-16 pb-8">
+  <section class="mx-auto max-w-4xl px-6 pt-16 pb-8">
     <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">Music</h1>
     <p class="mt-4 max-w-xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-      A timeline of performances I&rsquo;ve given. More on
+      A scrapbook of performances I&rsquo;ve given. More on
       <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.youtube.com/@jeffowang" target="_blank" rel="noopener noreferrer">YouTube</a>
       and
       <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.instagram.com/jeffmusics/" target="_blank" rel="noopener noreferrer">Instagram</a>.
     </p>
   </section>
 
-  <section class="mx-auto max-w-3xl px-6 pb-20">
-    {years.map((year) => (
-      <div class="mt-10 first:mt-0">
-        <h2 class="font-serif text-2xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)] border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] pb-2">
-          {year}
-        </h2>
-        <ul class="mt-6 space-y-8">
-          {byYear.get(year)!.map((p) => {
-            const { title, date, venue, notes, youtubeId, instagram, tags } = p.data;
-            const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
-            const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null;
-            return (
-              <li class="grid gap-4 sm:grid-cols-[16rem_1fr] sm:items-start">
-                {thumb ? (
-                  <a href={yt!} target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-soft)] dark:bg-[var(--color-bg-dark-soft)]">
-                    <img
-                      src={thumb}
-                      alt={title}
-                      loading="lazy"
-                      class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                    />
-                    <span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
-                      <svg class="h-12 w-12 text-white drop-shadow" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    </span>
-                  </a>
-                ) : (
-                  <div class="aspect-video rounded-lg border border-dashed border-[var(--color-border)] dark:border-[var(--color-border-dark)]"></div>
-                )}
-                <div>
-                  <div class="flex items-baseline justify-between gap-3">
-                    <h3 class="font-serif text-xl">{title}</h3>
-                    <time
-                      datetime={date.toISOString()}
-                      class="shrink-0 rounded-full border border-[var(--color-accent-200)] bg-[var(--color-accent-50)] px-2 py-0.5 text-xs text-[var(--color-accent-700)] dark:border-[var(--color-accent-800)] dark:bg-transparent dark:text-[var(--color-accent-300)]"
-                    >
-                      {fmtDate(date)}
-                    </time>
-                  </div>
-                  {venue && (
-                    <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>
-                  )}
-                  {notes && (
-                    <p class="mt-2 text-sm">{notes}</p>
-                  )}
-                  <div class="mt-3 flex flex-wrap gap-2 text-xs">
-                    {yt && (
-                      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href={yt} target="_blank" rel="noopener noreferrer">
-                        YouTube &rarr;
-                      </a>
-                    )}
-                    {instagram && (
-                      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href={instagram} target="_blank" rel="noopener noreferrer">
-                        Instagram &rarr;
-                      </a>
-                    )}
-                  </div>
-                  {tags.length > 0 && (
-                    <ul class="mt-3 flex flex-wrap gap-1.5">
-                      {tags.map((t) => (
-                        <li class="rounded-full border border-[var(--color-border)] dark:border-[var(--color-border-dark)] px-2 py-0.5 text-xs text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-                          {t}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+  <section class="mx-auto max-w-4xl px-6 pb-32">
+    <!-- Hand-drawn wobble filter, applied to arrows -->
+    <svg width="0" height="0" class="absolute" aria-hidden="true">
+      <defs>
+        <filter id="hand-wobble" x="-20%" y="-20%" width="140%" height="140%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="3" />
+          <feDisplacementMap in="SourceGraphic" scale="2.4" />
+        </filter>
+      </defs>
+    </svg>
+
+    <ol class="timeline grid grid-cols-1 gap-y-24 sm:grid-cols-2 sm:gap-x-12 sm:gap-y-32">
+      {performances.map((p, i) => {
+        const { title, date, venue, notes, youtubeId, instagram, tags } = p.data;
+        const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
+        const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null;
+        const link = yt ?? instagram ?? '#';
+        const isLeft = i % 2 === 0;
+        const tapeColor = tapes[i % tapes.length];
+        const next = performances[i + 1];
+        return (
+          <li
+            class="entry relative"
+            style={`grid-column: ${isLeft ? '1' : '2'};`}
+          >
+            <a
+              href={link}
+              target={link === '#' ? undefined : '_blank'}
+              rel={link === '#' ? undefined : 'noopener noreferrer'}
+              class="card group relative block rounded-md border border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-dark-soft)] p-3 shadow-[0_8px_20px_-8px_rgba(43,38,32,0.25),0_2px_4px_-2px_rgba(43,38,32,0.15)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_-10px_rgba(43,38,32,0.35),0_4px_8px_-4px_rgba(43,38,32,0.2)]"
+              style={`transform: rotate(${rot(i)}deg); transform-origin: center;`}
+            >
+              {/* Washi tape */}
+              <span
+                aria-hidden="true"
+                class="absolute -top-3 left-1/2 h-5 w-20 opacity-80"
+                style={`background:${tapeColor}; transform: translateX(calc(-50% + ${tapeShift(i)}px)) rotate(${tapeRot(i)}deg); box-shadow: 0 1px 2px rgba(0,0,0,0.1); clip-path: polygon(2% 10%, 98% 0%, 100% 90%, 0% 100%);`}
+              ></span>
+
+              {thumb ? (
+                <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
+                  <img
+                    src={thumb}
+                    alt={title}
+                    loading="lazy"
+                    class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
                 </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    ))}
+              ) : (
+                <div class="aspect-video rounded-sm border border-dashed border-[var(--color-border)]"></div>
+              )}
+
+              <div class="px-2 pt-3 pb-2">
+                <h3 class="font-serif text-xl leading-tight">{title}</h3>
+                <p class="mt-1 font-[var(--font-hand)] text-xl text-[var(--color-accent-700)] dark:text-[var(--color-accent-300)]" style="font-family: var(--font-hand);">
+                  {fmtDate(date)}
+                </p>
+                {venue && (
+                  <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>
+                )}
+                {notes && <p class="mt-1 text-sm">{notes}</p>}
+                {tags.length > 0 && (
+                  <ul class="mt-2 flex flex-wrap gap-1.5">
+                    {tags.map((t) => (
+                      <li class="rounded-full border border-[var(--color-border)] dark:border-[var(--color-border-dark)] px-2 py-0.5 text-xs text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </a>
+
+            {next && (
+              <svg
+                class="arrow pointer-events-none absolute"
+                viewBox="0 0 240 160"
+                style={`
+                  ${isLeft ? 'right: -3rem; top: calc(100% - 1rem);' : 'left: -3rem; top: calc(100% - 1rem);'}
+                  width: clamp(120px, 30vw, 220px);
+                  height: 140px;
+                  z-index: 1;
+                  filter: url(#hand-wobble);
+                  transform: ${isLeft ? 'none' : 'scaleX(-1)'};
+                `}
+                aria-hidden="true"
+              >
+                {/* Hand-drawn doubled line for sketchy feel */}
+                <g fill="none" stroke="var(--color-accent-700)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M 18 18 C 60 30, 100 70, 90 110 C 84 140, 140 150, 220 138" />
+                  <path d="M 22 22 C 64 34, 102 74, 94 114 C 88 142, 142 152, 218 142" stroke-width="1.6" opacity="0.7" />
+                  {/* arrowhead */}
+                  <path d="M 220 138 L 200 128 M 220 138 L 204 152" stroke-width="2.6" />
+                </g>
+              </svg>
+            )}
+          </li>
+        );
+      })}
+    </ol>
   </section>
 </BaseLayout>
+
+<style>
+  .timeline {
+    /* keep the timeline relative so absolute arrows position correctly */
+    position: relative;
+  }
+  /* Single-column fallback: arrows hide on mobile to avoid weird overlaps */
+  @media (max-width: 639px) {
+    .arrow { display: none !important; }
+  }
+</style>

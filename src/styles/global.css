@@ -2,6 +2,7 @@
 @plugin "@tailwindcss/typography";
 @import "@fontsource-variable/fraunces/wght.css";
 @import "@fontsource-variable/inter/wght.css";
+@import "@fontsource-variable/caveat/wght.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
@@ -9,6 +10,7 @@
   /* Fonts */
   --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-hand: "Caveat Variable", "Comic Sans MS", cursive;
 
   /* Editorial cream/warm palette */
   --color-bg: #fbf8f2;
