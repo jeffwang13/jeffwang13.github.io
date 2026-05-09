@@ -21,4 +21,20 @@ const projects = defineCollection({
     }),
 });
 
-export const collections = { projects };
+const music = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/music' }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      date: z.coerce.date(),
+      venue: z.string().optional(),
+      notes: z.string().optional(),
+      youtubeId: z.string().optional(),
+      instagram: z.string().url().optional(),
+      cover: image().optional(),
+      tags: z.array(z.string()).default([]),
+      draft: z.boolean().default(false),
+    }),
+});
+
+export const collections = { projects, music };

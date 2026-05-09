@@ -1,0 +1,104 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const performances = (await getCollection('music', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+// Group by year for the timeline
+const byYear = new Map<number, typeof performances>();
+for (const p of performances) {
+  const y = p.data.date.getUTCFullYear();
+  if (!byYear.has(y)) byYear.set(y, []);
+  byYear.get(y)!.push(p);
+}
+const years = [...byYear.keys()].sort((a, b) => b - a);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+---
+<BaseLayout title="Music — Jeffrey Wang" description="A timeline of music performances I've given.">
+  <section class="mx-auto max-w-3xl px-6 pt-16 pb-8">
+    <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">Music</h1>
+    <p class="mt-4 max-w-xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+      A timeline of performances I&rsquo;ve given. More on
+      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.youtube.com/@jeffowang" target="_blank" rel="noopener noreferrer">YouTube</a>
+      and
+      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.instagram.com/jeffmusics/" target="_blank" rel="noopener noreferrer">Instagram</a>.
+    </p>
+  </section>
+
+  <section class="mx-auto max-w-3xl px-6 pb-20">
+    {years.map((year) => (
+      <div class="mt-10 first:mt-0">
+        <h2 class="font-serif text-2xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)] border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] pb-2">
+          {year}
+        </h2>
+        <ul class="mt-6 space-y-8">
+          {byYear.get(year)!.map((p) => {
+            const { title, date, venue, notes, youtubeId, instagram, tags } = p.data;
+            const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
+            const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null;
+            return (
+              <li class="grid gap-4 sm:grid-cols-[16rem_1fr] sm:items-start">
+                {thumb ? (
+                  <a href={yt!} target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-soft)] dark:bg-[var(--color-bg-dark-soft)]">
+                    <img
+                      src={thumb}
+                      alt={title}
+                      loading="lazy"
+                      class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    />
+                    <span class="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity group-hover:opacity-100">
+                      <svg class="h-12 w-12 text-white drop-shadow" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    </span>
+                  </a>
+                ) : (
+                  <div class="aspect-video rounded-lg border border-dashed border-[var(--color-border)] dark:border-[var(--color-border-dark)]"></div>
+                )}
+                <div>
+                  <div class="flex items-baseline justify-between gap-3">
+                    <h3 class="font-serif text-xl">{title}</h3>
+                    <time
+                      datetime={date.toISOString()}
+                      class="shrink-0 rounded-full border border-[var(--color-accent-200)] bg-[var(--color-accent-50)] px-2 py-0.5 text-xs text-[var(--color-accent-700)] dark:border-[var(--color-accent-800)] dark:bg-transparent dark:text-[var(--color-accent-300)]"
+                    >
+                      {fmtDate(date)}
+                    </time>
+                  </div>
+                  {venue && (
+                    <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>
+                  )}
+                  {notes && (
+                    <p class="mt-2 text-sm">{notes}</p>
+                  )}
+                  <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                    {yt && (
+                      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href={yt} target="_blank" rel="noopener noreferrer">
+                        YouTube &rarr;
+                      </a>
+                    )}
+                    {instagram && (
+                      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href={instagram} target="_blank" rel="noopener noreferrer">
+                        Instagram &rarr;
+                      </a>
+                    )}
+                  </div>
+                  {tags.length > 0 && (
+                    <ul class="mt-3 flex flex-wrap gap-1.5">
+                      {tags.map((t) => (
+                        <li class="rounded-full border border-[var(--color-border)] dark:border-[var(--color-border-dark)] px-2 py-0.5 text-xs text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+                          {t}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </section>
+</BaseLayout>
