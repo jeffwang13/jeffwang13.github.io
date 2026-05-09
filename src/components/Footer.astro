@@ -1,0 +1,20 @@
+---
+const year = new Date().getFullYear();
+---
+<footer class="mt-24 border-t border-[var(--color-border)] dark:border-[var(--color-border-dark)]">
+  <div class="mx-auto flex max-w-3xl flex-col gap-4 px-6 py-10 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)] sm:flex-row sm:items-center sm:justify-between">
+    <p>&copy; {year} Jeffrey Wang</p>
+    <ul class="flex flex-wrap items-center gap-x-5 gap-y-2">
+      <li>
+        <a class="hover:text-[var(--color-accent-500)] transition-colors" href="https://github.com/jeffwang13" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </li>
+      <li>
+        <a class="hover:text-[var(--color-accent-500)] transition-colors" href="https://linkedin.com/in/jeffreywang13" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+      </li>
+      <li aria-hidden="true" class="text-[var(--color-border)] dark:text-[var(--color-border-dark)]">·</li>
+      <li>
+        <a class="hover:text-[var(--color-accent-500)] transition-colors" href="/legacy/">Legacy site (2019)</a>
+      </li>
+    </ul>
+  </div>
+</footer>

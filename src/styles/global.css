@@ -1,1 +1,59 @@
 @import "tailwindcss";
+@import "@fontsource-variable/fraunces/wght.css";
+@import "@fontsource-variable/inter/wght.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Fonts */
+  --font-sans: "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces Variable", ui-serif, Georgia, serif;
+
+  /* Editorial cream/warm palette */
+  --color-bg: #fbf8f2;
+  --color-bg-soft: #f5f0e6;
+  --color-fg: #2b2620;
+  --color-muted: #6e665b;
+  --color-border: #e8e1d5;
+
+  --color-bg-dark: #1c1814;
+  --color-bg-dark-soft: #25201a;
+  --color-fg-dark: #f0ebe0;
+  --color-muted-dark: #a39a8c;
+  --color-border-dark: #2f2a22;
+
+  /* Light orange accent */
+  --color-accent-50: #fff6ed;
+  --color-accent-100: #ffe8d0;
+  --color-accent-200: #ffd0a3;
+  --color-accent-300: #fdb274;
+  --color-accent-400: #f59243;
+  --color-accent-500: #ef7a26;
+  --color-accent-600: #e0631a;
+  --color-accent-700: #b94c18;
+  --color-accent-800: #933e1a;
+  --color-accent-900: #763418;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html.dark {
+  background: var(--color-bg-dark);
+  color: var(--color-fg-dark);
+}
+
+::selection {
+  background: var(--color-accent-200);
+  color: var(--color-fg);
+}
+
+html.dark ::selection {
+  background: var(--color-accent-700);
+  color: var(--color-fg-dark);
+}
