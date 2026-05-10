@@ -32,6 +32,7 @@ const timelineSchema = ({ image }: { image: () => z.ZodType }) =>
     instagram: z.string().url().optional(),
     cover: image().optional(),
     tags: z.array(z.string()).default([]),
+    featured: z.boolean().default(false),
     draft: z.boolean().default(false),
   });
 
@@ -45,4 +46,9 @@ const sports = defineCollection({
   schema: timelineSchema,
 });
 
-export const collections = { projects, music, sports };
+const travel = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/travel' }),
+  schema: timelineSchema,
+});
+
+export const collections = { projects, music, sports, travel };

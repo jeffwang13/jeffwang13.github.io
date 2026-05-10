@@ -1,0 +1,66 @@
+---
+import { getCollection, render } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('travel', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, date, venue, cover, tags } = post.data;
+
+const formattedDate = date.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+---
+<BaseLayout title={`${title} — Jeffrey Wang`}>
+  <article class="mx-auto max-w-3xl px-6 pt-16 pb-20">
+    <a href="/travel/" class="text-sm text-[var(--color-muted)] hover:text-[var(--color-accent-500)] dark:text-[var(--color-muted-dark)] transition-colors">
+      &larr; All posts
+    </a>
+
+    <header class="mt-6 border-b border-[var(--color-border)] dark:border-[var(--color-border-dark)] pb-8">
+      <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">{title}</h1>
+      <div class="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
+        <time datetime={date.toISOString()}>{formattedDate}</time>
+        {venue && (
+          <>
+            <span aria-hidden="true">·</span>
+            <span>{venue}</span>
+          </>
+        )}
+        {tags.length > 0 && (
+          <>
+            <span aria-hidden="true">·</span>
+            <ul class="flex flex-wrap gap-1.5">
+              {tags.map((t) => (
+                <li class="rounded-full border border-[var(--color-border)] dark:border-[var(--color-border-dark)] px-2 py-0.5 text-xs">
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </header>
+
+    {cover && (
+      <div class="mt-8 overflow-hidden rounded-lg border border-[var(--color-border)] dark:border-[var(--color-border-dark)] bg-[var(--color-bg-soft)] dark:bg-[var(--color-bg-dark-soft)]">
+        <Image src={cover} alt={title} widths={[600, 1200]} sizes="(min-width: 768px) 768px, 100vw" class="w-full" />
+      </div>
+    )}
+
+    <div class="prose prose-zinc dark:prose-invert mt-10 max-w-none prose-a:text-[var(--color-accent-600)] prose-a:no-underline hover:prose-a:underline prose-headings:font-serif">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>

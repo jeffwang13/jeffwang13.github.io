@@ -19,9 +19,13 @@ export interface TimelineEntry {
 
 interface Props {
   entries: TimelineEntry[];
+  /** Optional base path. If set, each entry links to `${linkBase}/${entry.id}/`
+   * (used by /travel/ where each entry has its own blog post page).
+   * If omitted, entries fall back to youtubeId / instagram / '#'. */
+  linkBase?: string;
 }
 
-const { entries } = Astro.props;
+const { entries, linkBase } = Astro.props;
 
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-US', {
@@ -109,7 +113,8 @@ const colRCardLeft = 58;
     const { title, date, venue, youtubeId, instagram, cover, tags } = p.data;
     const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
     const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg` : null;
-    const link = yt ?? instagram ?? '#';
+    const link = linkBase ? `${linkBase}/${p.id}/` : (yt ?? instagram ?? '#');
+    const external = !linkBase && link !== '#';
     const isLeft = i % 2 === 0;
     const tapeColor = tapes[i % tapes.length];
     return (
@@ -119,8 +124,8 @@ const colRCardLeft = 58;
       >
         <a
           href={link}
-          target={link === '#' ? undefined : '_blank'}
-          rel={link === '#' ? undefined : 'noopener noreferrer'}
+          target={external ? '_blank' : undefined}
+          rel={external ? 'noopener noreferrer' : undefined}
           class="card group relative block rounded-md border border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-dark-soft)] p-3 shadow-[0_8px_20px_-8px_rgba(43,38,32,0.25),0_2px_4px_-2px_rgba(43,38,32,0.15)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_-10px_rgba(43,38,32,0.35),0_4px_8px_-4px_rgba(43,38,32,0.2)]"
           style={`transform: rotate(${rot(i)}deg); transform-origin: center;`}
         >

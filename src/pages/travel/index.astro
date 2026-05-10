@@ -3,18 +3,18 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Timeline from '../../components/Timeline.astro';
 
-const events = (await getCollection('sports', ({ data }) => !data.draft))
+const posts = (await getCollection('travel', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
-<BaseLayout title="Sports — Jeffrey Wang" description="A timeline of sports moments — skiing, hockey, and other adventures.">
+<BaseLayout title="Travel — Jeffrey Wang" description="Travel blog — places I've been, things I've seen.">
   <section class="mx-auto max-w-4xl px-6 pt-16 pb-8">
-    <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">Sports</h1>
+    <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">Travel</h1>
     <p class="mt-4 max-w-xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-      I love SPORTS! Hockey, basketball, running, biking, tennis, you name it.
+      Notes from places I&rsquo;ve been.
     </p>
   </section>
 
   <section class="mx-auto max-w-4xl px-6 pb-32">
-    <Timeline entries={events} />
+    <Timeline entries={posts} linkBase="/travel" />
   </section>
 </BaseLayout>
