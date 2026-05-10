@@ -21,20 +21,28 @@ const projects = defineCollection({
     }),
 });
 
+// Shared schema for /music and /sports — same Timeline shape.
+const timelineSchema = ({ image }: { image: () => z.ZodType }) =>
+  z.object({
+    title: z.string(),
+    date: z.coerce.date(),
+    venue: z.string().optional(),
+    notes: z.string().optional(),
+    youtubeId: z.string().optional(),
+    instagram: z.string().url().optional(),
+    cover: image().optional(),
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false),
+  });
+
 const music = defineCollection({
   loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/music' }),
-  schema: ({ image }) =>
-    z.object({
-      title: z.string(),
-      date: z.coerce.date(),
-      venue: z.string().optional(),
-      notes: z.string().optional(),
-      youtubeId: z.string().optional(),
-      instagram: z.string().url().optional(),
-      cover: image().optional(),
-      tags: z.array(z.string()).default([]),
-      draft: z.boolean().default(false),
-    }),
+  schema: timelineSchema,
 });
 
-export const collections = { projects, music };
+const sports = defineCollection({
+  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/content/sports' }),
+  schema: timelineSchema,
+});
+
+export const collections = { projects, music, sports };
