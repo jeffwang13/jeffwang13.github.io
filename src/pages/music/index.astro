@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 
 const performances = (await getCollection('music', ({ data }) => !data.draft))
@@ -29,9 +30,7 @@ const colRCardLeft = 58;   // inner edge of right-column card
   <section class="mx-auto max-w-4xl px-6 pt-16 pb-8">
     <h1 class="font-serif text-4xl font-light tracking-tight sm:text-5xl">Music</h1>
     <p class="mt-4 max-w-xl text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">
-      A scrapbook of performances I&rsquo;ve given. More on
-      <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.youtube.com/@jeffowang" target="_blank" rel="noopener noreferrer">YouTube</a>
-      and
+      Documenting my musical journey! More on
       <a class="text-[var(--color-accent-600)] hover:text-[var(--color-accent-700)] underline underline-offset-4" href="https://www.instagram.com/jeffmusics/" target="_blank" rel="noopener noreferrer">Instagram</a>.
     </p>
   </section>
@@ -111,9 +110,9 @@ const colRCardLeft = 58;   // inner edge of right-column card
 
       {/* Cards positioned absolutely so we control overlap exactly */}
       {performances.map((p, i) => {
-        const { title, date, venue, notes, youtubeId, instagram, tags } = p.data;
+        const { title, date, venue, notes, youtubeId, instagram, cover, tags } = p.data;
         const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
-        const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null;
+        const thumb = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/mqdefault.jpg` : null;
         const link = yt ?? instagram ?? '#';
         const isLeft = i % 2 === 0;
         const tapeColor = tapes[i % tapes.length];
@@ -136,7 +135,17 @@ const colRCardLeft = 58;   // inner edge of right-column card
               ></span>
               {thumb ? (
                 <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
-                  <img src={thumb} alt={title} loading="lazy" class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+                  <img src={thumb} alt={title} loading="lazy" class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]" />
+                </div>
+              ) : cover ? (
+                <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
+                  <Image
+                    src={cover}
+                    alt={title}
+                    widths={[400, 800]}
+                    sizes="(min-width: 768px) 22rem, 100vw"
+                    class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+                  />
                 </div>
               ) : (
                 <div class="aspect-video rounded-sm border border-dashed border-[var(--color-border)]"></div>
@@ -147,7 +156,6 @@ const colRCardLeft = 58;   // inner edge of right-column card
                   {fmtDate(date)}
                 </p>
                 {venue && <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>}
-                {notes && <p class="mt-1 text-sm">{notes}</p>}
                 {tags.length > 0 && (
                   <ul class="mt-2 flex flex-wrap gap-1.5">
                     {tags.map((t) => (
@@ -228,17 +236,47 @@ const colRCardLeft = 58;   // inner edge of right-column card
     });
 
     const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const overlap = 0.4;
+    // Two layout constraints, applied as max(...) per card:
+    //   (1) constant gap below the same-column card above (card[i-2])
+    //   (2) the arrow from card[i] (older) up to card[i-1] (newer) must
+    //       have a usable vertical span. The arrow base sits 1/3 up from
+    //       card[i]'s bottom, so we need:
+    //         card[i].top + card[i].h * 2/3 >= card[i-1].bottom + ARROW_MIN
+    //       which rearranges to
+    //         card[i].top >= card[i-1].bottom + ARROW_MIN - card[i].h * 2/3
+    // Whichever constraint is tighter wins, so a tall newer card occasionally
+    // bumps the next card down further than the constant same-column gap.
+    const GAP_REM = 5;
+    const GAP_PX = GAP_REM * remToPx;
+    const ARROW_MIN_REM = 5;
+    const ARROW_MIN_PX = ARROW_MIN_REM * remToPx;
 
     type Pos = { top: number; height: number; isLeft: boolean };
     const positions: Pos[] = [];
-    let cumulative = 0;
     entries.forEach((entry, i) => {
       const card = entry.querySelector<HTMLElement>('.card');
       const h = card ? card.getBoundingClientRect().height : 0;
       const isLeft = entry.classList.contains('col-l');
-      positions.push({ top: cumulative, height: h, isLeft });
-      cumulative += i < entries.length - 1 ? h * (1 - overlap) : h;
+
+      let top: number;
+      if (i === 0) {
+        top = 0;
+      } else {
+        const chronPrev = positions[i - 1];
+        const arrowConstraint =
+          chronPrev.top + chronPrev.height + ARROW_MIN_PX - (h * 2) / 3;
+        if (i === 1) {
+          // No same-column predecessor for card[1]; default to half-way
+          // through card[0], but never less than the arrow constraint.
+          const halfPrev = chronPrev.height / 2;
+          top = Math.max(halfPrev, arrowConstraint);
+        } else {
+          const sameColPrev = positions[i - 2];
+          const sameColRule = sameColPrev.top + sameColPrev.height + GAP_PX;
+          top = Math.max(sameColRule, arrowConstraint);
+        }
+      }
+      positions.push({ top, height: h, isLeft });
     });
 
     // Apply positions
@@ -246,7 +284,11 @@ const colRCardLeft = 58;   // inner edge of right-column card
       entry.style.top = `${positions[i].top}px`;
     });
 
-    const totalHpx = cumulative;
+    // Total height = bottom-most card across both columns
+    const totalHpx = positions.reduce(
+      (max, p) => Math.max(max, p.top + p.height),
+      0,
+    );
     const totalHrem = totalHpx / remToPx;
     timeline.style.minHeight = `${totalHpx}px`;
 
