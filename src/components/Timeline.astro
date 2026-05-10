@@ -205,130 +205,130 @@ const colRCardLeft = 58;
   }
 </style>
 
-<script>
-  // Lay out the timeline using each card's ACTUAL rendered height, then
-  // recompute the arrow paths so they still anchor correctly. Same logic
-  // for both /music and /sports — anything that uses <Timeline />.
-  function layoutTimeline() {
-    if (window.matchMedia('(max-width: 639px)').matches) return;
+<script is:inline>
+  // Inline (not bundled) so it runs synchronously while the page is being
+  // parsed — fixes positions BEFORE the first paint, instead of after the
+  // ES-module bundle is downloaded and executed.
+  (function () {
+    function layoutTimeline() {
+      if (window.matchMedia('(max-width: 639px)').matches) return;
 
-    const timeline = document.querySelector<HTMLElement>('.timeline');
-    if (!timeline) return;
+      var timeline = document.querySelector('.timeline');
+      if (!timeline) return;
 
-    const entries = Array.from(timeline.querySelectorAll<HTMLElement>('.entry'));
-    if (entries.length === 0) return;
+      var entries = Array.prototype.slice.call(timeline.querySelectorAll('.entry'));
+      if (entries.length === 0) return;
 
-    const arrowsSvg = timeline.querySelector<SVGSVGElement>('.arrows');
-    const arrowGroups = arrowsSvg
-      ? Array.from(arrowsSvg.querySelectorAll<SVGGElement>('g.arrow-group'))
-      : [];
+      var arrowsSvg = timeline.querySelector('.arrows');
+      var arrowGroups = arrowsSvg
+        ? Array.prototype.slice.call(arrowsSvg.querySelectorAll('g.arrow-group'))
+        : [];
 
-    entries.forEach((e) => {
-      e.style.top = '0px';
-    });
+      entries.forEach(function (e) {
+        e.style.top = '0px';
+      });
 
-    const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const GAP_REM = 5;
-    const GAP_PX = GAP_REM * remToPx;
-    const ARROW_MIN_REM = 5;
-    const ARROW_MIN_PX = ARROW_MIN_REM * remToPx;
+      var remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      var GAP_PX = 5 * remToPx;
+      var ARROW_MIN_PX = 5 * remToPx;
 
-    type Pos = { top: number; height: number; isLeft: boolean };
-    const positions: Pos[] = [];
-    entries.forEach((entry, i) => {
-      const card = entry.querySelector<HTMLElement>('.card');
-      const h = card ? card.getBoundingClientRect().height : 0;
-      const isLeft = entry.classList.contains('col-l');
+      var positions = [];
+      entries.forEach(function (entry, i) {
+        var card = entry.querySelector('.card');
+        var h = card ? card.getBoundingClientRect().height : 0;
+        var isLeft = entry.classList.contains('col-l');
 
-      let top: number;
-      if (i === 0) {
-        top = 0;
-      } else {
-        const chronPrev = positions[i - 1];
-        const arrowConstraint =
-          chronPrev.top + chronPrev.height + ARROW_MIN_PX - (h * 2) / 3;
-        if (i === 1) {
-          const halfPrev = chronPrev.height / 2;
-          top = Math.max(halfPrev, arrowConstraint);
+        var top;
+        if (i === 0) {
+          top = 0;
         } else {
-          const sameColPrev = positions[i - 2];
-          const sameColRule = sameColPrev.top + sameColPrev.height + GAP_PX;
-          top = Math.max(sameColRule, arrowConstraint);
+          var chronPrev = positions[i - 1];
+          var arrowConstraint =
+            chronPrev.top + chronPrev.height + ARROW_MIN_PX - (h * 2) / 3;
+          if (i === 1) {
+            var halfPrev = chronPrev.height / 2;
+            top = Math.max(halfPrev, arrowConstraint);
+          } else {
+            var sameColPrev = positions[i - 2];
+            var sameColRule = sameColPrev.top + sameColPrev.height + GAP_PX;
+            top = Math.max(sameColRule, arrowConstraint);
+          }
         }
-      }
-      positions.push({ top, height: h, isLeft });
-    });
+        positions.push({ top: top, height: h, isLeft: isLeft });
+      });
 
-    entries.forEach((entry, i) => {
-      entry.style.top = `${positions[i].top}px`;
-    });
+      entries.forEach(function (entry, i) {
+        entry.style.top = positions[i].top + 'px';
+      });
 
-    const totalHpx = positions.reduce(
-      (max, p) => Math.max(max, p.top + p.height),
-      0,
-    );
-    const totalHrem = totalHpx / remToPx;
-    timeline.style.minHeight = `${totalHpx}px`;
+      var totalHpx = positions.reduce(function (max, p) {
+        return Math.max(max, p.top + p.height);
+      }, 0);
+      var totalHrem = totalHpx / remToPx;
+      timeline.style.minHeight = totalHpx + 'px';
 
-    if (!arrowsSvg || arrowGroups.length === 0) return;
+      if (!arrowsSvg || arrowGroups.length === 0) return;
 
-    arrowsSvg.setAttribute('viewBox', `0 0 100 ${totalHrem}`);
-    arrowsSvg.setAttribute('preserveAspectRatio', 'none');
-    arrowsSvg.style.height = `${totalHpx}px`;
-    arrowsSvg.style.width = '100%';
+      arrowsSvg.setAttribute('viewBox', '0 0 100 ' + totalHrem);
+      arrowsSvg.setAttribute('preserveAspectRatio', 'none');
+      arrowsSvg.style.height = totalHpx + 'px';
+      arrowsSvg.style.width = '100%';
 
-    const colLCardRight = 42;
-    const colRCardLeft = 58;
-    const c1XOffset = 8;
-    const tipXOffset = 3;
-    const aHalfW = 1.4;
-    const aH = 0.85;
-    const c1YOffset = 2.85;
-    const c2YOffset = 2.0;
+      var colLCardRight = 42;
+      var colRCardLeft = 58;
+      var c1XOffset = 8;
+      var tipXOffset = 3;
+      var aHalfW = 1.4;
+      var aH = 0.85;
+      var c1YOffset = 2.85;
+      var c2YOffset = 2.0;
 
-    arrowGroups.forEach((g, i) => {
-      const newer = positions[i];
-      const older = positions[i + 1];
-      if (!older) return;
+      arrowGroups.forEach(function (g, i) {
+        var newer = positions[i];
+        var older = positions[i + 1];
+        if (!older) return;
 
-      const newerIsLeft = newer.isLeft;
-      const olderInnerX = newerIsLeft ? colRCardLeft : colLCardRight;
-      const olderTopRem = older.top / remToPx;
-      const olderHRem = older.height / remToPx;
-      const newerBotRem = (newer.top + newer.height) / remToPx;
+        var newerIsLeft = newer.isLeft;
+        var olderInnerX = newerIsLeft ? colRCardLeft : colLCardRight;
+        var olderTopRem = older.top / remToPx;
+        var olderHRem = older.height / remToPx;
+        var newerBotRem = (newer.top + newer.height) / remToPx;
 
-      const baseY = olderTopRem + (olderHRem * 2) / 3;
-      const tipX = newerIsLeft ? colLCardRight - tipXOffset : colRCardLeft + tipXOffset;
-      const tipY = newerBotRem;
+        var baseY = olderTopRem + (olderHRem * 2) / 3;
+        var tipX = newerIsLeft ? colLCardRight - tipXOffset : colRCardLeft + tipXOffset;
+        var tipY = newerBotRem;
 
-      const c1X = olderInnerX + (newerIsLeft ? -c1XOffset : c1XOffset);
-      const c1Y = baseY + c1YOffset;
-      const c2X = tipX;
-      const c2Y = tipY + c2YOffset;
+        var c1X = olderInnerX + (newerIsLeft ? -c1XOffset : c1XOffset);
+        var c1Y = baseY + c1YOffset;
+        var c2X = tipX;
+        var c2Y = tipY + c2YOffset;
 
-      const line = g.querySelector<SVGPathElement>('.arrow-line');
-      const head = g.querySelector<SVGPathElement>('.arrow-head');
-      if (line) {
-        line.setAttribute(
-          'd',
-          `M ${olderInnerX} ${baseY} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${tipX} ${tipY}`,
-        );
-      }
-      if (head) {
-        head.setAttribute(
-          'd',
-          `M ${tipX - aHalfW} ${tipY + aH} L ${tipX} ${tipY} L ${tipX + aHalfW} ${tipY + aH}`,
-        );
-      }
-    });
-  }
+        var line = g.querySelector('.arrow-line');
+        var head = g.querySelector('.arrow-head');
+        if (line) {
+          line.setAttribute(
+            'd',
+            'M ' + olderInnerX + ' ' + baseY + ' C ' + c1X + ' ' + c1Y + ', ' + c2X + ' ' + c2Y + ', ' + tipX + ' ' + tipY,
+          );
+        }
+        if (head) {
+          head.setAttribute(
+            'd',
+            'M ' + (tipX - aHalfW) + ' ' + (tipY + aH) + ' L ' + tipX + ' ' + tipY + ' L ' + (tipX + aHalfW) + ' ' + (tipY + aH),
+          );
+        }
+      });
+    }
 
-  if (document.readyState === 'complete') {
+    // Run NOW (synchronously, while parsing — DOM up to this point is in the
+    // tree because the script lives at the bottom of the timeline component).
     layoutTimeline();
-  } else {
-    window.addEventListener('load', layoutTimeline);
-  }
-  window.addEventListener('resize', layoutTimeline);
-  setTimeout(layoutTimeline, 100);
-  setTimeout(layoutTimeline, 500);
+    // And re-run after late-arriving image dimensions / fonts settle.
+    if (document.readyState !== 'complete') {
+      window.addEventListener('load', layoutTimeline);
+    }
+    window.addEventListener('resize', layoutTimeline);
+    setTimeout(layoutTimeline, 100);
+    setTimeout(layoutTimeline, 500);
+  })();
 </script>
