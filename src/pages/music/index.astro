@@ -8,11 +8,22 @@ const performances = (await getCollection('music', ({ data }) => !data.draft))
 const fmtDate = (d: Date) =>
   d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
-// Deterministic per-entry pseudo-random feel: tiny rotations + tape colors + arrow seeds
-const rot = (i: number) => ((i * 7919) % 7) - 3;          // -3..+3 deg
-const tapeRot = (i: number) => ((i * 6577) % 21) - 10;    // -10..+10 deg
-const tapeShift = (i: number) => ((i * 4621) % 60) - 30;  // -30..+30 px
-const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi colors
+const rot = (i: number) => ((i * 7919) % 7) - 3;
+const tapeRot = (i: number) => ((i * 6577) % 21) - 10;
+const tapeShift = (i: number) => ((i * 4621) % 60) - 30;
+const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa'];
+
+// Layout constants. Each card's top is STEP rem below the previous,
+// so consecutive cards overlap by (CARD_H - STEP) rem ≈ 40%.
+const CARD_H = 20;
+const STEP = 12;
+const totalH = (performances.length - 1) * STEP + CARD_H;
+
+// Card-edge X positions as % of timeline width. The timeline has each card
+// at 22rem max-width pinned to its column edge, leaving a vertical gap between
+// the two columns. Arrows route through that gap.
+const colLCardRight = 42;  // inner edge of left-column card
+const colRCardLeft = 58;   // inner edge of right-column card
 ---
 <BaseLayout title="Music — Jeffrey Wang" description="A timeline of music performances I've given.">
   <section class="mx-auto max-w-4xl px-6 pt-16 pb-8">
@@ -26,17 +37,79 @@ const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi 
   </section>
 
   <section class="mx-auto max-w-4xl px-6 pb-32">
-    <!-- Hand-drawn wobble filter, applied to arrows -->
     <svg width="0" height="0" class="absolute" aria-hidden="true">
       <defs>
-        <filter id="hand-wobble" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.025" numOctaves="2" seed="3" />
-          <feDisplacementMap in="SourceGraphic" scale="2.4" />
+        <filter id="hand-wobble" x="-10%" y="-10%" width="120%" height="120%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="5" />
+          <feDisplacementMap in="SourceGraphic" scale="2.2" />
         </filter>
       </defs>
     </svg>
 
-    <ol class="timeline grid grid-cols-1 gap-y-24 sm:grid-cols-2 sm:gap-x-12 sm:gap-y-32">
+    <div class="timeline relative" style={`min-height: ${totalH}rem;`}>
+      {/* Single SVG overlay drawing every arrow as one chain */}
+      <svg
+        class="arrows pointer-events-none absolute inset-0"
+        viewBox={`0 0 100 ${totalH}`}
+        preserveAspectRatio="none"
+        style={`width: 100%; height: ${totalH}rem;`}
+        aria-hidden="true"
+      >
+        <g
+          fill="none"
+          stroke="var(--color-accent-700)"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          style="filter: url(#hand-wobble);"
+        >
+          {Array.from({ length: performances.length - 1 }).map((_, i) => {
+            // Arrow with a gentle DOWNWARD curve — apex below the straight
+            // line between base and tip, about half the amplitude of the
+            // previous upward arch.
+            //
+            //   base = older.inner-side, 1/3 up from its bottom
+            //   tip  = newer.bottom-face, 3 units inside its inner corner
+            //
+            // C1 pulls the start downward and slightly toward the gap, so
+            // the curve dips below the straight line. C2 is directly below
+            // the tip so the end velocity is straight up — keeps the
+            // arrowhead V flush with the body's last segment.
+            const newerIsLeft = i % 2 === 0;
+            const olderInnerX = newerIsLeft ? colRCardLeft : colLCardRight;
+            const baseY = (i + 1) * STEP + (CARD_H * 2) / 3;
+            const tipX = newerIsLeft ? colLCardRight - 3 : colRCardLeft + 3;
+            const tipY = i * STEP + CARD_H;
+
+            const c1X = olderInnerX + (newerIsLeft ? -8 : 8);
+            const c1Y = baseY + 2.85;
+            const c2X = tipX;
+            const c2Y = tipY + 2.0;
+
+            const aHalfW = 1.4;
+            const aH = 0.85;
+
+            return (
+              <g class="arrow-group">
+                <path
+                  class="arrow-line"
+                  d={`M ${olderInnerX} ${baseY} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${tipX} ${tipY}`}
+                  stroke-width="2"
+                  vector-effect="non-scaling-stroke"
+                />
+                {/* Arrowhead at (tipX, tipY) pointing UP into the bottom face */}
+                <path
+                  class="arrow-head"
+                  d={`M ${tipX - aHalfW} ${tipY + aH} L ${tipX} ${tipY} L ${tipX + aHalfW} ${tipY + aH}`}
+                  stroke-width="2"
+                  vector-effect="non-scaling-stroke"
+                />
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+
+      {/* Cards positioned absolutely so we control overlap exactly */}
       {performances.map((p, i) => {
         const { title, date, venue, notes, youtubeId, instagram, tags } = p.data;
         const yt = youtubeId ? `https://www.youtube.com/watch?v=${youtubeId}` : null;
@@ -44,11 +117,10 @@ const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi 
         const link = yt ?? instagram ?? '#';
         const isLeft = i % 2 === 0;
         const tapeColor = tapes[i % tapes.length];
-        const next = performances[i + 1];
         return (
-          <li
-            class="entry relative"
-            style={`grid-column: ${isLeft ? '1' : '2'};`}
+          <div
+            class={`entry absolute ${isLeft ? 'col-l' : 'col-r'}`}
+            style={`top: ${i * STEP}rem;`}
           >
             <a
               href={link}
@@ -57,34 +129,24 @@ const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi 
               class="card group relative block rounded-md border border-[var(--color-border)] bg-white dark:bg-[var(--color-bg-dark-soft)] p-3 shadow-[0_8px_20px_-8px_rgba(43,38,32,0.25),0_2px_4px_-2px_rgba(43,38,32,0.15)] transition-transform duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_-10px_rgba(43,38,32,0.35),0_4px_8px_-4px_rgba(43,38,32,0.2)]"
               style={`transform: rotate(${rot(i)}deg); transform-origin: center;`}
             >
-              {/* Washi tape */}
               <span
                 aria-hidden="true"
                 class="absolute -top-3 left-1/2 h-5 w-20 opacity-80"
                 style={`background:${tapeColor}; transform: translateX(calc(-50% + ${tapeShift(i)}px)) rotate(${tapeRot(i)}deg); box-shadow: 0 1px 2px rgba(0,0,0,0.1); clip-path: polygon(2% 10%, 98% 0%, 100% 90%, 0% 100%);`}
               ></span>
-
               {thumb ? (
                 <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
-                  <img
-                    src={thumb}
-                    alt={title}
-                    loading="lazy"
-                    class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                  />
+                  <img src={thumb} alt={title} loading="lazy" class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
                 </div>
               ) : (
                 <div class="aspect-video rounded-sm border border-dashed border-[var(--color-border)]"></div>
               )}
-
               <div class="px-2 pt-3 pb-2">
                 <h3 class="font-serif text-xl leading-tight">{title}</h3>
-                <p class="mt-1 font-[var(--font-hand)] text-xl text-[var(--color-accent-700)] dark:text-[var(--color-accent-300)]" style="font-family: var(--font-hand);">
+                <p class="mt-1 text-xl text-[var(--color-accent-700)] dark:text-[var(--color-accent-300)]" style="font-family: var(--font-hand);">
                   {fmtDate(date)}
                 </p>
-                {venue && (
-                  <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>
-                )}
+                {venue && <p class="mt-1 text-sm text-[var(--color-muted)] dark:text-[var(--color-muted-dark)]">{venue}</p>}
                 {notes && <p class="mt-1 text-sm">{notes}</p>}
                 {tags.length > 0 && (
                   <ul class="mt-2 flex flex-wrap gap-1.5">
@@ -97,44 +159,164 @@ const tapes = ['#fde68a', '#fbcfe8', '#bbf7d0', '#bfdbfe', '#fed7aa']; // washi 
                 )}
               </div>
             </a>
-
-            {next && (
-              <svg
-                class="arrow pointer-events-none absolute"
-                viewBox="0 0 240 160"
-                style={`
-                  ${isLeft ? 'right: -3rem; top: calc(100% - 1rem);' : 'left: -3rem; top: calc(100% - 1rem);'}
-                  width: clamp(120px, 30vw, 220px);
-                  height: 140px;
-                  z-index: 1;
-                  filter: url(#hand-wobble);
-                  transform: ${isLeft ? 'none' : 'scaleX(-1)'};
-                `}
-                aria-hidden="true"
-              >
-                {/* Hand-drawn doubled line for sketchy feel */}
-                <g fill="none" stroke="var(--color-accent-700)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M 18 18 C 60 30, 100 70, 90 110 C 84 140, 140 150, 220 138" />
-                  <path d="M 22 22 C 64 34, 102 74, 94 114 C 88 142, 142 152, 218 142" stroke-width="1.6" opacity="0.7" />
-                  {/* arrowhead */}
-                  <path d="M 220 138 L 200 128 M 220 138 L 204 152" stroke-width="2.6" />
-                </g>
-              </svg>
-            )}
-          </li>
+          </div>
         );
       })}
-    </ol>
+    </div>
   </section>
 </BaseLayout>
 
 <style>
-  .timeline {
-    /* keep the timeline relative so absolute arrows position correctly */
-    position: relative;
+  .timeline { width: 100%; }
+
+  .entry {
+    width: calc(50% - 0.75rem);
+    max-width: 22rem;
   }
-  /* Single-column fallback: arrows hide on mobile to avoid weird overlaps */
+  .entry.col-l { left: 0; }
+  .entry.col-r { right: 0; }
+
+  .entry .card {
+    width: 100%;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Arrows above cards so the chain reads as drawn on top of the scrapbook. */
+  .arrows {
+    z-index: 5;
+  }
+
+  /* Mobile: stack into single column, no overlap, hide arrows */
   @media (max-width: 639px) {
-    .arrow { display: none !important; }
+    .timeline { min-height: 0 !important; }
+    .entry,
+    .entry.col-l,
+    .entry.col-r {
+      position: static;
+      width: 100%;
+      max-width: 28rem;
+      margin: 0 auto 2.5rem;
+    }
+    .arrows { display: none; }
   }
 </style>
+
+<script>
+  // Lay out the music timeline with 40% Y-overlap based on each card's
+  // ACTUAL rendered height, then recompute the arrow paths so they still
+  // start at the older card's inner side (1/3 from its bottom) and land
+  // on the newer card's bottom face. The static SSR positions act as a
+  // graceful fallback if this script doesn't run.
+  function layoutTimeline() {
+    if (window.matchMedia('(max-width: 639px)').matches) return;
+
+    const timeline = document.querySelector<HTMLElement>('.timeline');
+    if (!timeline) return;
+
+    const entries = Array.from(timeline.querySelectorAll<HTMLElement>('.entry'));
+    if (entries.length === 0) return;
+
+    const arrowsSvg = timeline.querySelector<SVGSVGElement>('.arrows');
+    const arrowGroups = arrowsSvg
+      ? Array.from(arrowsSvg.querySelectorAll<SVGGElement>('g.arrow-group'))
+      : [];
+
+    // Reset top so cards size by their natural content, then measure.
+    entries.forEach((e) => {
+      e.style.top = '0px';
+    });
+
+    const remToPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const overlap = 0.4;
+
+    type Pos = { top: number; height: number; isLeft: boolean };
+    const positions: Pos[] = [];
+    let cumulative = 0;
+    entries.forEach((entry, i) => {
+      const card = entry.querySelector<HTMLElement>('.card');
+      const h = card ? card.getBoundingClientRect().height : 0;
+      const isLeft = entry.classList.contains('col-l');
+      positions.push({ top: cumulative, height: h, isLeft });
+      cumulative += i < entries.length - 1 ? h * (1 - overlap) : h;
+    });
+
+    // Apply positions
+    entries.forEach((entry, i) => {
+      entry.style.top = `${positions[i].top}px`;
+    });
+
+    const totalHpx = cumulative;
+    const totalHrem = totalHpx / remToPx;
+    timeline.style.minHeight = `${totalHpx}px`;
+
+    if (!arrowsSvg || arrowGroups.length === 0) return;
+
+    // ViewBox keeps Y in REM units so the SVG hand-wobble filter (which
+    // generates noise relative to viewBox coords) stays at the same
+    // wavelength regardless of the page's pixel height. The CSS height/width
+    // sets the rendered size; preserveAspectRatio="none" stretches both axes.
+    arrowsSvg.setAttribute('viewBox', `0 0 100 ${totalHrem}`);
+    arrowsSvg.setAttribute('preserveAspectRatio', 'none');
+    arrowsSvg.style.height = `${totalHpx}px`;
+    arrowsSvg.style.width = '100%';
+
+    // All values below are in viewBox space: X is percent of timeline width,
+    // Y is rem (so matches the static SSR units exactly).
+    const colLCardRight = 42;
+    const colRCardLeft = 58;
+    const c1XOffset = 8;
+    const tipXOffset = 3;
+    const aHalfW = 1.4;
+    const aH = 0.85;
+    const c1YOffset = 2.85;
+    const c2YOffset = 2.0;
+
+    arrowGroups.forEach((g, i) => {
+      const newer = positions[i];
+      const older = positions[i + 1];
+      if (!older) return;
+
+      const newerIsLeft = newer.isLeft;
+      const olderInnerX = newerIsLeft ? colRCardLeft : colLCardRight;
+      const olderTopRem = older.top / remToPx;
+      const olderHRem = older.height / remToPx;
+      const newerBotRem = (newer.top + newer.height) / remToPx;
+
+      const baseY = olderTopRem + (olderHRem * 2) / 3;
+      const tipX = newerIsLeft ? colLCardRight - tipXOffset : colRCardLeft + tipXOffset;
+      const tipY = newerBotRem;
+
+      const c1X = olderInnerX + (newerIsLeft ? -c1XOffset : c1XOffset);
+      const c1Y = baseY + c1YOffset;
+      const c2X = tipX;
+      const c2Y = tipY + c2YOffset;
+
+      const line = g.querySelector<SVGPathElement>('.arrow-line');
+      const head = g.querySelector<SVGPathElement>('.arrow-head');
+      if (line) {
+        line.setAttribute(
+          'd',
+          `M ${olderInnerX} ${baseY} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${tipX} ${tipY}`,
+        );
+      }
+      if (head) {
+        head.setAttribute(
+          'd',
+          `M ${tipX - aHalfW} ${tipY + aH} L ${tipX} ${tipY} L ${tipX + aHalfW} ${tipY + aH}`,
+        );
+      }
+    });
+  }
+
+  // Run after initial paint, after fonts/images settle, and on resize.
+  if (document.readyState === 'complete') {
+    layoutTimeline();
+  } else {
+    window.addEventListener('load', layoutTimeline);
+  }
+  window.addEventListener('resize', layoutTimeline);
+  // Belt-and-suspenders: re-run a couple of times to catch late image loads.
+  setTimeout(layoutTimeline, 100);
+  setTimeout(layoutTimeline, 500);
+</script>
