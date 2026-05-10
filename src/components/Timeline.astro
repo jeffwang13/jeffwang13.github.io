@@ -136,7 +136,14 @@ const colRCardLeft = 58;
           ></span>
           {thumb ? (
             <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
-              <img src={thumb} alt={title} loading="lazy" class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]" />
+              <img
+                src={thumb}
+                alt={title}
+                width="320"
+                height="180"
+                loading="lazy"
+                class="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.02]"
+              />
             </div>
           ) : cover ? (
             <div class="overflow-hidden rounded-sm bg-[var(--color-bg-soft)]">
