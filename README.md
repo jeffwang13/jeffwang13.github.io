@@ -76,8 +76,36 @@ astro.config.mjs
 
 Both pages read from a content collection with the same schema (`timelineSchema` in `content.config.ts`). Each card is one MDX file.
 
-1. (Optional) Drop a cover image into `src/assets/music/` or `src/assets/sports/`. PNG or JPG, any dimensions — the card will render the image at its natural aspect ratio. If you have a YouTube video instead, you don't need a cover image; the card uses the YouTube thumbnail automatically.
-2. Create `src/content/music/<slug>.mdx` (or `src/content/sports/<slug>.mdx`):
+### Quick template
+
+Copy this into `src/content/music/<slug>.mdx` or `src/content/sports/<slug>.mdx`:
+
+```mdx
+---
+title: "Song title"
+date: 2026-07-23                                  # performance date; cards sort newest first
+venue: "City, Province/State"   # optional
+notes: "Short note or setlist"  # optional
+instagram: "https://www.instagram.com/p/POSTID/"  # optional
+youtubeId: "YOUTUBE_VIDEO_ID"                     # optional (just the ID)
+cover: "../../assets/music/<slug>.png"              # for sports cards, use ../../assets/sports/<slug>.png
+tags: ["Cover", "Live"]                             # optional
+featured: false                                     # optional — true shows on home page
+---
+```
+
+### Checklist
+
+1. Place the cover image in `src/assets/music/<slug>.png` (or `src/assets/sports/<slug>.png`).  
+   **Naming tip:** use the same kebab-case slug as the MDX filename so the asset and content files stay paired (e.g. `ticking-toronto.mdx` + `ticking-toronto.png`).
+2. Create the MDX file using the template above.
+3. Set `date` so the card sorts correctly (newest first).
+4. If the entry should appear on the home page, set `featured: true`.
+5. Run `npm run dev` and verify `/music/` (or `/sports/`) and `/` look right.
+
+**Contributor note:** music and sports cards are fully data-driven. You do not need to edit any `.astro` files to add a new card — just add the asset and the MDX file; the page sorts by `date` automatically.
+
+### Detailed example
 
 ```mdx
 ---
@@ -94,7 +122,7 @@ featured: true                       # optional — appears on home page if true
 
 The card body (anything below the closing `---`) is ignored on these timelines, so you can leave it empty.
 
-3. `npm run dev` — the new card appears on `/music/` (or `/sports/`) immediately, sorted by `date` (newest first).
+`npm run dev` — the new card appears on `/music/` (or `/sports/`) immediately, sorted by `date` (newest first).
 
 **Image priority on music/sports cards:** if `youtubeId` is set, the card uses YouTube's `mqdefault.jpg` (320×180) as the thumbnail. Otherwise it falls back to `cover`. If neither is set, the card shows a dashed placeholder.
 
